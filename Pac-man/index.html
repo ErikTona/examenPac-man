@@ -19,7 +19,7 @@
     </style>
 </head>
 <body>
-    <canvas id="Canvas" width="600" height="600"></canvas>
+    <canvas id="Canvas" width="600" height="650"></canvas>
 
     <script>
         const canvas = document.getElementById("Canvas");
@@ -30,37 +30,71 @@
             y: 50,
             width: 40,
             height: 40,
-            speed: 2,
+            speed: 4,
             direction: "right",
             image: new Image()
         };
         
-        pacMan.image.src = "Batman.png";  
+        pacMan.image.src = "Ladron.jpg";  
 
+        const walls = [
+            { x: 100, y: 100, width: 400, height: 20 },
+            { x: 100, y: 100, width: 20, height: 200 },
+            { x: 480, y: 100, width: 20, height: 200 },
+            { x: 100, y: 280, width: 400, height: 20 },
+
+            { x: 100, y: 400, width: 150, height: 20 },  
+            { x: 350, y: 400, width: 150, height: 20 },  
+            { x: 100, y: 400, width: 20, height: 180 },  
+            { x: 480, y: 400, width: 20, height: 180 }   
+        ];
+        //Dibujar muros
+        function drawWalls() {
+            ctx.fillStyle = "blue"; 
+            walls.forEach(wall => {
+                ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+            });
+        }
+        //Dibujar pac-man
         function drawPacMan() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(pacMan.image, pacMan.x, pacMan.y, pacMan.width, pacMan.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);  
+            drawWalls(); 
+            ctx.drawImage(pacMan.image, pacMan.x, pacMan.y, pacMan.width, pacMan.height); 
         }
 
         function updatePosition() {
-            if (pacMan.direction === "right") {
-                pacMan.x += pacMan.speed;
-                if (pacMan.x + pacMan.width > canvas.width) pacMan.x = canvas.width - pacMan.width;
-            }
-            if (pacMan.direction === "left") {
-                pacMan.x -= pacMan.speed;
-                if (pacMan.x < 0) pacMan.x = 0;
-            }
-            if (pacMan.direction === "up") {
-                pacMan.y -= pacMan.speed;
-                if (pacMan.y < 0) pacMan.y = 0;
-            }
-            if (pacMan.direction === "down") {
-                pacMan.y += pacMan.speed;
-                if (pacMan.y + pacMan.height > canvas.height) pacMan.y = canvas.height - pacMan.height;
+            let nextX = pacMan.x;
+            let nextY = pacMan.y;
+
+            if (pacMan.direction === "right") nextX += pacMan.speed;
+            if (pacMan.direction === "left") nextX -= pacMan.speed;
+            if (pacMan.direction === "up") nextY -= pacMan.speed;
+            if (pacMan.direction === "down") nextY += pacMan.speed;
+
+            
+            if (nextX < 0) nextX = 0; 
+            if (nextX + pacMan.width > canvas.width) nextX = canvas.width - pacMan.width; 
+            if (nextY < 0) nextY = 0;  
+            if (nextY + pacMan.height > canvas.height) nextY = canvas.height - pacMan.height; 
+
+            // Colision
+            if (!WallCollision(nextX, nextY)) {
+                pacMan.x = nextX;
+                pacMan.y = nextY;
             }
         }
 
+        function WallCollision(x, y) {
+            return walls.some(wall => {
+                return (
+                    x < wall.x + wall.width &&
+                    x + pacMan.width > wall.x &&
+                    y < wall.y + wall.height &&
+                    y + pacMan.height > wall.y
+                );
+            });
+        }
+         //Cambios de direccion
         function changeDirection(event) {
             if (event.key === "ArrowRight") pacMan.direction = "right";
             if (event.key === "ArrowLeft") pacMan.direction = "left";
