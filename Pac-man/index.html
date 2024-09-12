@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pac-man</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+        }
+        canvas {
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="Canvas" width="600" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById("Canvas");
+        const ctx = canvas.getContext("2d");
+
+        let pacMan = {
+            x: 50,
+            y: 50,
+            width: 40,
+            height: 40,
+            speed: 2,
+            direction: "right",
+            image: new Image()
+        };
+        
+        pacMan.image.src = "Batman.png";  
+
+        function drawPacMan() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(pacMan.image, pacMan.x, pacMan.y, pacMan.width, pacMan.height);
+        }
+
+        function updatePosition() {
+            if (pacMan.direction === "right") {
+                pacMan.x += pacMan.speed;
+                if (pacMan.x + pacMan.width > canvas.width) pacMan.x = canvas.width - pacMan.width;
+            }
+            if (pacMan.direction === "left") {
+                pacMan.x -= pacMan.speed;
+                if (pacMan.x < 0) pacMan.x = 0;
+            }
+            if (pacMan.direction === "up") {
+                pacMan.y -= pacMan.speed;
+                if (pacMan.y < 0) pacMan.y = 0;
+            }
+            if (pacMan.direction === "down") {
+                pacMan.y += pacMan.speed;
+                if (pacMan.y + pacMan.height > canvas.height) pacMan.y = canvas.height - pacMan.height;
+            }
+        }
+
+        function changeDirection(event) {
+            if (event.key === "ArrowRight") pacMan.direction = "right";
+            if (event.key === "ArrowLeft") pacMan.direction = "left";
+            if (event.key === "ArrowUp") pacMan.direction = "up";
+            if (event.key === "ArrowDown") pacMan.direction = "down";
+        }
+
+        function gameLoop() {
+            updatePosition();
+            drawPacMan();
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener("keydown", changeDirection);
+        pacMan.image.onload = gameLoop; 
+
+    </script>
+</body>
+</html>
