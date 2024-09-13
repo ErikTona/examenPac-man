@@ -28,8 +28,8 @@
         let pacMan = {
             x: 50,
             y: 50,
-            width: 40,
-            height: 40,
+            width: 35,
+            height: 35,
             speed: 4,
             direction: "right",
             image: new Image()
@@ -38,15 +38,27 @@
         pacMan.image.src = "Ladron.jpg";  
 
         const walls = [
-            { x: 100, y: 100, width: 400, height: 20 },
-            { x: 100, y: 100, width: 20, height: 200 },
-            { x: 480, y: 100, width: 20, height: 200 },
-            { x: 100, y: 280, width: 400, height: 20 },
+        
+        { x: 100, y: 100, width: 120, height: 20 },  
+        { x: 420, y: 100, width: 120, height: 20 },  
+        { x: 100, y: 100, width: 20, height: 200 }, 
+        { x: 480, y: 100, width: 20, height: 200 },  
+        { x: 100, y: 280, width: 120, height: 20 },  
+        { x: 420, y: 280, width: 120, height: 20 },  
 
-            { x: 100, y: 400, width: 150, height: 20 },  
-            { x: 350, y: 400, width: 150, height: 20 },  
-            { x: 100, y: 400, width: 20, height: 180 },  
-            { x: 480, y: 400, width: 20, height: 180 }   
+        { x: 100, y: 400, width: 150, height: 20 },  
+        { x: 370, y: 400, width: 130, height: 20 },  
+        { x: 100, y: 420, width: 20, height: 160 },  
+        { x: 480, y: 420, width: 20, height: 160 },  
+
+        { x: 200, y: 165, width: 20, height: 70 },  
+        { x: 300, y: 150, width: 20, height: 100 },  
+        { x: 400, y: 165, width: 20, height: 70 },  
+
+        { x: 200, y: 350, width: 20, height: 100 },  
+        { x: 300, y: 320, width: 20, height: 100 },  
+        { x: 400, y: 350, width: 20, height: 100 }   
+
         ];
         //Dibujar muros
         function drawWalls() {
