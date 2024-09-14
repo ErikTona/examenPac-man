@@ -40,7 +40,7 @@
             y: 50,
             width: 35,
             height: 35,
-            speed: 4,
+            speed: 7,
             direction: "right",
             image: new Image()
         };
@@ -48,50 +48,42 @@
         pacMan.image.src = "Ladron.jpg";  
 
         const walls = [
-        
-        { x: 100, y: 100, width: 120, height: 20 },  
-        { x: 420, y: 100, width: 120, height: 20 },  
-        { x: 100, y: 100, width: 20, height: 200 }, 
-        { x: 480, y: 100, width: 20, height: 200 },  
-        { x: 100, y: 280, width: 120, height: 20 },  
-        { x: 420, y: 280, width: 120, height: 20 },  
-
-        { x: 100, y: 400, width: 150, height: 20 },  
-        { x: 370, y: 400, width: 130, height: 20 },  
-        { x: 100, y: 420, width: 20, height: 160 },  
-        { x: 480, y: 420, width: 20, height: 160 },  
-
-        { x: 200, y: 165, width: 20, height: 70 },  
-        { x: 300, y: 150, width: 20, height: 100 },  
-        { x: 400, y: 165, width: 20, height: 70 },  
-
-        { x: 200, y: 350, width: 20, height: 100 },  
-        { x: 300, y: 320, width: 20, height: 100 },  
-        { x: 400, y: 350, width: 20, height: 100 }   
-
+            { x: 100, y: 100, width: 120, height: 20 },  
+            { x: 420, y: 100, width: 120, height: 20 },  
+            { x: 100, y: 100, width: 20, height: 200 }, 
+            { x: 480, y: 100, width: 20, height: 200 },  
+            { x: 100, y: 280, width: 120, height: 20 },  
+            { x: 420, y: 280, width: 120, height: 20 },  
+            { x: 100, y: 400, width: 150, height: 20 },  
+            { x: 370, y: 400, width: 130, height: 20 },  
+            { x: 100, y: 420, width: 20, height: 160 },  
+            { x: 480, y: 420, width: 20, height: 160 },  
+            { x: 200, y: 165, width: 20, height: 70 },  
+            { x: 300, y: 150, width: 20, height: 100 },  
+            { x: 400, y: 165, width: 20, height: 70 },  
+            { x: 200, y: 350, width: 20, height: 100 },  
+            { x: 300, y: 320, width: 20, height: 100 },  
+            { x: 400, y: 350, width: 20, height: 100 }
         ];
 
         let startTime = Date.now();  
-
-        //Actualiza el reloj
+        //Tiempo
         function updateTimer() {
             let elapsedTime = Math.floor((Date.now() - startTime) / 1000);  
             timerDisplay.textContent = `Time: ${elapsedTime}s`;  
         }
-        //Dibujar muros
+        //Dibuja los muros
         function drawWalls() {
             ctx.fillStyle = "blue"; 
             walls.forEach(wall => {
                 ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
             });
         }
-        //Dibujar pac-man
+        //Dibuja al pacman
         function drawPacMan() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);  
-            drawWalls(); 
             ctx.drawImage(pacMan.image, pacMan.x, pacMan.y, pacMan.width, pacMan.height); 
         }
-
+        //Mueve al pacman
         function updatePosition() {
             let nextX = pacMan.x;
             let nextY = pacMan.y;
@@ -101,30 +93,28 @@
             if (pacMan.direction === "up") nextY -= pacMan.speed;
             if (pacMan.direction === "down") nextY += pacMan.speed;
 
-            
             if (nextX < 0) nextX = 0; 
             if (nextX + pacMan.width > canvas.width) nextX = canvas.width - pacMan.width; 
             if (nextY < 0) nextY = 0;  
             if (nextY + pacMan.height > canvas.height) nextY = canvas.height - pacMan.height; 
 
-            // Colision
             if (!WallCollision(nextX, nextY)) {
                 pacMan.x = nextX;
                 pacMan.y = nextY;
             }
         }
-
-        function WallCollision(x, y) {
+        //Colision
+        function WallCollision(x, y, width = pacMan.width, height = pacMan.height) {
             return walls.some(wall => {
                 return (
                     x < wall.x + wall.width &&
-                    x + pacMan.width > wall.x &&
+                    x + width > wall.x &&
                     y < wall.y + wall.height &&
-                    y + pacMan.height > wall.y
+                    y + height > wall.y
                 );
             });
         }
-         //Cambios de direccion
+        //Cambio de direccion
         function changeDirection(event) {
             if (event.key === "ArrowRight") pacMan.direction = "right";
             if (event.key === "ArrowLeft") pacMan.direction = "left";
@@ -132,9 +122,70 @@
             if (event.key === "ArrowDown") pacMan.direction = "down";
         }
 
+        const cubes = [];
+        const cubeCount = 7;  
+        const cubeSize = 20;
+
+        //Valida los enemigos
+        function generateValidCubePosition() {
+            let x, y;
+            do {
+                x = Math.random() * (canvas.width - cubeSize);
+                y = Math.random() * (canvas.height - cubeSize);
+            } while (WallCollision(x, y, cubeSize, cubeSize));
+            return { x, y };
+        }
+
+        for (let i = 0; i < cubeCount; i++) {
+            const { x, y } = generateValidCubePosition();
+            cubes.push({
+                x,
+                y,
+                speed: 2
+            });
+        }
+        
+        function updateCubes() {
+            cubes.forEach(cube => {
+                let nextX = cube.x;
+                let nextY = cube.y;
+
+                
+                if (pacMan.x > cube.x) nextX += cube.speed;
+                if (pacMan.x < cube.x) nextX -= cube.speed;
+                if (pacMan.y > cube.y) nextY += cube.speed;
+                if (pacMan.y < cube.y) nextY -= cube.speed;
+
+                
+                if (nextX < 0 || nextX + cubeSize > canvas.width) {
+                    nextX = cube.x;
+                }
+                if (nextY < 0 || nextY + cubeSize > canvas.height) {
+                    nextY = cube.y;
+                }
+
+                
+                if (!WallCollision(nextX, nextY, cubeSize, cubeSize)) {
+                    cube.x = nextX;
+                    cube.y = nextY;
+                }
+            });
+        }
+        //Dibuja los enemigos
+        function drawCubes() {
+            ctx.fillStyle = "red";
+            cubes.forEach(cube => {
+                ctx.fillRect(cube.x, cube.y, cubeSize, cubeSize);
+            });
+        }
+        //Llama las funciones
         function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);  
+            drawWalls();
             updatePosition();
             drawPacMan();
+            updateCubes();
+            drawCubes();
             updateTimer(); 
             requestAnimationFrame(gameLoop);
         }
