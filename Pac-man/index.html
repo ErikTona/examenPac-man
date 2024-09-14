@@ -16,14 +16,24 @@
         canvas {
             border: 2px solid white;
         }
+        #timer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
+    <div id="timer">Time: 0s</div>
     <canvas id="Canvas" width="600" height="650"></canvas>
 
     <script>
         const canvas = document.getElementById("Canvas");
         const ctx = canvas.getContext("2d");
+        const timerDisplay = document.getElementById("timer");
 
         let pacMan = {
             x: 50,
@@ -60,6 +70,14 @@
         { x: 400, y: 350, width: 20, height: 100 }   
 
         ];
+
+        let startTime = Date.now();  
+
+        //Actualiza el reloj
+        function updateTimer() {
+            let elapsedTime = Math.floor((Date.now() - startTime) / 1000);  
+            timerDisplay.textContent = `Time: ${elapsedTime}s`;  
+        }
         //Dibujar muros
         function drawWalls() {
             ctx.fillStyle = "blue"; 
@@ -117,6 +135,7 @@
         function gameLoop() {
             updatePosition();
             drawPacMan();
+            updateTimer(); 
             requestAnimationFrame(gameLoop);
         }
 
