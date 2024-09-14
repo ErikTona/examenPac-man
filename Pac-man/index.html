@@ -110,6 +110,7 @@
             pacMan.y = 50;
             pacMan.direction = "right";
             startTime = Date.now();  
+            resetCubes();
         }
    
         //Dibuja los muros
@@ -185,6 +186,14 @@
                 y = Math.random() * (canvas.height - cubeSize);
             } while (WallCollision(x, y, cubeSize, cubeSize));
             return { x, y };
+        }
+
+        function resetCubes() {
+            for (let i = 0; i < cubeCount; i++) {
+                const { x, y } = generateValidCubePosition();
+                cubes[i].x = x;
+                cubes[i].y = y;
+            }
         }
 
         for (let i = 0; i < cubeCount; i++) {
