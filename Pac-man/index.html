@@ -24,23 +24,54 @@
             font-size: 24px;
             margin-bottom: 10px;
         }
+        .image-container {
+            width: 100%;
+            text-align: center;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        #resetButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <div class="image-container">
+        <img src="Pacman.png" alt="Portada 1">
+    </div>
     <div id="timer">Time: 0s</div>
+    <div class="image-container">
+        <img src="BatmanLogo.png" alt="Portada 2">
+    </div>
     <canvas id="Canvas" width="600" height="650"></canvas>
-
+    <button id="resetButton">Reiniciar Juego</button>
+    <audio id="backgroundMusic" loop>
+        <source src="batman-series-tv-.mp3" type="audio/mp3">
+    </audio>
     <script>
         const canvas = document.getElementById("Canvas");
         const ctx = canvas.getContext("2d");
         const timerDisplay = document.getElementById("timer");
+        const backgroundMusic = document.getElementById("backgroundMusic");
+        const resetButton = document.getElementById("resetButton");
+
+        document.addEventListener("keydown", () => {
+            backgroundMusic.play(); 
+        });
+
+        backgroundMusic.volume = 1;
 
         let pacMan = {
             x: 50,
             y: 50,
             width: 35,
             height: 35,
-            speed: 7,
+            speed: 6,
             direction: "right",
             image: new Image()
         };
@@ -67,11 +98,20 @@
         ];
 
         let startTime = Date.now();  
+        
         //Tiempo
         function updateTimer() {
             let elapsedTime = Math.floor((Date.now() - startTime) / 1000);  
             timerDisplay.textContent = `Time: ${elapsedTime}s`;  
         }
+        //Reinicio del juego
+        function resetGame() {
+            pacMan.x = 50;
+            pacMan.y = 50;
+            pacMan.direction = "right";
+            startTime = Date.now();  
+        }
+   
         //Dibuja los muros
         function drawWalls() {
             ctx.fillStyle = "blue"; 
@@ -79,10 +119,12 @@
                 ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
             });
         }
+
         //Dibuja al pacman
         function drawPacMan() {
             ctx.drawImage(pacMan.image, pacMan.x, pacMan.y, pacMan.width, pacMan.height); 
         }
+
         //Mueve al pacman
         function updatePosition() {
             let nextX = pacMan.x;
@@ -103,6 +145,7 @@
                 pacMan.y = nextY;
             }
         }
+
         //Colision
         function WallCollision(x, y, width = pacMan.width, height = pacMan.height) {
             return walls.some(wall => {
@@ -114,6 +157,7 @@
                 );
             });
         }
+
         //Cambio de direccion
         function changeDirection(event) {
             if (event.key === "ArrowRight") pacMan.direction = "right";
@@ -124,9 +168,16 @@
 
         const cubes = [];
         const cubeCount = 7;  
-        const cubeSize = 20;
+        const cubeSize = 30;
 
-        //Valida los enemigos
+        const cubeImages = [];
+
+        for (let i = 0; i < cubeCount; i++) {
+            const img = new Image();
+            img.src = "Batman.png";  
+            cubeImages.push(img);
+        }
+
         function generateValidCubePosition() {
             let x, y;
             do {
@@ -141,7 +192,7 @@
             cubes.push({
                 x,
                 y,
-                speed: 2
+                speed: 1
             });
         }
         
@@ -150,13 +201,11 @@
                 let nextX = cube.x;
                 let nextY = cube.y;
 
-                
                 if (pacMan.x > cube.x) nextX += cube.speed;
                 if (pacMan.x < cube.x) nextX -= cube.speed;
                 if (pacMan.y > cube.y) nextY += cube.speed;
                 if (pacMan.y < cube.y) nextY -= cube.speed;
 
-                
                 if (nextX < 0 || nextX + cubeSize > canvas.width) {
                     nextX = cube.x;
                 }
@@ -164,20 +213,19 @@
                     nextY = cube.y;
                 }
 
-                
                 if (!WallCollision(nextX, nextY, cubeSize, cubeSize)) {
                     cube.x = nextX;
                     cube.y = nextY;
                 }
             });
         }
-        //Dibuja los enemigos
+
         function drawCubes() {
-            ctx.fillStyle = "red";
-            cubes.forEach(cube => {
-                ctx.fillRect(cube.x, cube.y, cubeSize, cubeSize);
+            cubes.forEach((cube, index) => {
+                ctx.drawImage(cubeImages[index], cube.x, cube.y, cubeSize, cubeSize);
             });
         }
+
         //Llama las funciones
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);  
@@ -189,9 +237,10 @@
             updateTimer(); 
             requestAnimationFrame(gameLoop);
         }
-
         document.addEventListener("keydown", changeDirection);
         pacMan.image.onload = gameLoop; 
+        resetButton.addEventListener("click", resetGame);
+
 
     </script>
 </body>
