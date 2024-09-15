@@ -24,6 +24,14 @@
             font-size: 24px;
             margin-bottom: 10px;
         }
+        #score{
+            position: absolute;
+            top: 10px;
+            left: 130px;
+            color: white;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
         .image-container {
             width: 100%;
             text-align: center;
@@ -45,6 +53,7 @@
         <img src="Pacman.png" alt="Portada 1">
     </div>
     <div id="timer">Time: 0s</div>
+    <div id="score">Score: 0</div>
     <div class="image-container">
         <img src="BatmanLogo.png" alt="Portada 2">
     </div>
@@ -57,6 +66,7 @@
         const canvas = document.getElementById("Canvas");
         const ctx = canvas.getContext("2d");
         const timerDisplay = document.getElementById("timer");
+        const scoreDisplay = document.getElementById("score");
         const backgroundMusic = document.getElementById("backgroundMusic");
         const resetButton = document.getElementById("resetButton");
 
@@ -65,6 +75,8 @@
         });
 
         backgroundMusic.volume = 1;
+
+        let score = 0;
 
         let pacMan = {
             x: 50,
@@ -104,6 +116,11 @@
             let elapsedTime = Math.floor((Date.now() - startTime) / 1000);  
             timerDisplay.textContent = `Time: ${elapsedTime}s`;  
         }
+
+        //Puntaje
+        function updateScore() {
+            scoreDisplay.textContent = `Score: ${score}`; 
+        }
         
         //Reinicio del juego
         function resetGame() {
@@ -111,6 +128,8 @@
             pacMan.y = 50;
             pacMan.direction = "right";
             startTime = Date.now();  
+            score = 0; 
+            updateScore(); 
             resetCubes();
             generatePoints();  
         }
@@ -172,7 +191,7 @@
         //Puntos 
         const points = [];
         const pointSize = 10;
-        const pointCount = 50;  
+        const pointCount = 120;  
 
         function generatePoints() {
             points.length = 0;
@@ -204,7 +223,11 @@
                     pacMan.y < point.y + pointSize &&
                     pacMan.y + pacMan.height > point.y
                 ) {
-                    points.splice(i, 1);  
+                    points.splice(i, 1); 
+                    score += 10; 
+                    updateScore(); 
+
+
                 }
             }
         }
@@ -212,7 +235,7 @@
         //Enemigos
         const cubes = [];
         const cubeCount = 7;  
-        const cubeSize = 30;
+        const cubeSize = 20;
         const cubeImages = [];
 
         for (let i = 0; i < cubeCount; i++) {
