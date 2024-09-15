@@ -104,6 +104,7 @@
             let elapsedTime = Math.floor((Date.now() - startTime) / 1000);  
             timerDisplay.textContent = `Time: ${elapsedTime}s`;  
         }
+        
         //Reinicio del juego
         function resetGame() {
             pacMan.x = 50;
@@ -111,6 +112,7 @@
             pacMan.direction = "right";
             startTime = Date.now();  
             resetCubes();
+            generatePoints();  
         }
    
         //Dibuja los muros
@@ -147,7 +149,7 @@
             }
         }
 
-        //Colision
+        //Colision 
         function WallCollision(x, y, width = pacMan.width, height = pacMan.height) {
             return walls.some(wall => {
                 return (
@@ -167,10 +169,50 @@
             if (event.key === "ArrowDown") pacMan.direction = "down";
         }
 
+        //Puntos 
+        const points = [];
+        const pointSize = 10;
+        const pointCount = 50;  
+
+        function generatePoints() {
+            points.length = 0;
+            for (let i = 0; i < pointCount; i++) {
+                let x, y;
+                do {
+                    x = Math.random() * (canvas.width - pointSize);
+                    y = Math.random() * (canvas.height - pointSize);
+                } while (WallCollision(x, y, pointSize, pointSize));
+                points.push({ x, y });
+            }
+        }
+
+        function drawPoints() {
+            ctx.fillStyle = "yellow"; 
+            points.forEach(point => {
+                ctx.beginPath();
+                ctx.arc(point.x + pointSize / 2, point.y + pointSize / 2, pointSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function checkPointCollision() {
+            for (let i = points.length - 1; i >= 0; i--) {
+                let point = points[i];
+                if (
+                    pacMan.x < point.x + pointSize &&
+                    pacMan.x + pacMan.width > point.x &&
+                    pacMan.y < point.y + pointSize &&
+                    pacMan.y + pacMan.height > point.y
+                ) {
+                    points.splice(i, 1);  
+                }
+            }
+        }
+
+        //Enemigos
         const cubes = [];
         const cubeCount = 7;  
         const cubeSize = 30;
-
         const cubeImages = [];
 
         for (let i = 0; i < cubeCount; i++) {
@@ -235,7 +277,7 @@
             });
         }
 
-        //Llama las funciones
+        //Llama las funciones 
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);  
             drawWalls();
@@ -243,14 +285,17 @@
             drawPacMan();
             updateCubes();
             drawCubes();
+            drawPoints();
+            checkPointCollision();
             updateTimer(); 
             requestAnimationFrame(gameLoop);
         }
+        
         document.addEventListener("keydown", changeDirection);
         pacMan.image.onload = gameLoop; 
         resetButton.addEventListener("click", resetGame);
 
-
+        generatePoints(); 
     </script>
 </body>
 </html>
