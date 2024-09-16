@@ -40,6 +40,12 @@
             max-width: 100%;
             height: auto;
         }
+        #winMessage {
+            color: yellow;
+            font-size: 48px;
+            display: none;
+            margin-top: 20px;
+        }
         #resetButton {
             margin-top: 20px;
             padding: 10px 20px;
@@ -58,6 +64,7 @@
         <img src="BatmanLogo.png" alt="Portada 2">
     </div>
     <canvas id="Canvas" width="600" height="650"></canvas>
+    <div id="winMessage">¡Ganaste!</div>
     <button id="resetButton">Reiniciar Juego</button>
     <audio id="backgroundMusic" loop>
         <source src="batman-series-tv-.mp3" type="audio/mp3">
@@ -68,6 +75,7 @@
         const ctx = canvas.getContext("2d");
         const timerDisplay = document.getElementById("timer");
         const scoreDisplay = document.getElementById("score");
+        const winMessage = document.getElementById("winMessage"); 
         const backgroundMusic = document.getElementById("backgroundMusic");
         const resetButton = document.getElementById("resetButton");
 
@@ -76,7 +84,7 @@
         });
 
         backgroundMusic.volume = 1;
-
+        let gameWon = false; 
         let score = 0;
 
         let pacMan = {
@@ -134,6 +142,9 @@
             resetCubes();
             generatePoints();  
             generateLargePoints();
+            winMessage.style.display = "none";
+            gameWon = false;
+            gameLoop(); 
         }
    
         //Dibuja los muros
@@ -229,6 +240,11 @@
                     score += 10; 
                     updateScore(); 
 
+                    if (points.length === 0 && largePoints.length === 0) {
+                        gameWon = true; 
+                        winMessage.style.display = "block"; 
+                    }
+
 
                 }
             }
@@ -271,6 +287,11 @@
                 largePoints.splice(i, 1); 
                 score += 30;  
                 updateScore();  
+
+                if (points.length === 0 && largePoints.length === 0) {
+                        gameWon = true;
+                        winMessage.style.display = "block"; 
+                    }
             }
         }
     }
@@ -349,6 +370,10 @@
             drawWalls();
             updatePosition();
             drawPacMan();
+            if (!gameWon) {
+             updateCubes(); 
+             drawCubes();
+            }   
             updateCubes();
             drawCubes();
             drawLargePoints();
@@ -356,7 +381,9 @@
             drawPoints();
             checkPointCollision();
             updateTimer(); 
-            requestAnimationFrame(gameLoop);
+            if(!gameWon){
+             requestAnimationFrame(gameLoop);
+            }
         }
         
         document.addEventListener("keydown", changeDirection);
