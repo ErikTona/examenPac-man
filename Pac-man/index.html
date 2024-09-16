@@ -32,9 +32,20 @@
             font-size: 24px;
             margin-bottom: 10px;
         }
+        #instructions {
+            position: absolute;
+            top: 35px;
+            left: 10px;
+            color: white;
+            font-size: 18px;
+            max-width: 300px;
+            padding: 10px;
+            border-radius: 5px;
+        }
         .image-container {
             width: 100%;
             text-align: center;
+            margin-top: 300px;
         }
         .image-container img {
             max-width: 100%;
@@ -52,6 +63,12 @@
             font-size: 18px;
             cursor: pointer;
         }
+        #startButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -60,14 +77,34 @@
     </div>
     <div id="timer">Time: 0s</div>
     <div id="score">Score: 0</div>
+    <div id="instructions">
+        <h3>Instrucciones:</h3>
+        <ul>
+            <li>Ayuda a el ladron a recoger todos los puntos antes de que Batman lo atrape</li>
+            <li><strong>Flecha derecha:</strong> Mover a la derecha</li>
+            <li><strong>Flecha izquierda:</strong> Mover a la izquierda</li>
+            <li><strong>Flecha arriba:</strong> Mover hacia arriba</li>
+            <li><strong>Flecha abajo:</strong> Mover hacia abajo</li>
+            <li>Recoge todos los puntos amarillos y naranjas para ganar</li>
+            <li>Evita que Batman te toque</li>
+        </ul>
+    </div>
     <div class="image-container">
         <img src="BatmanLogo.png" alt="Portada 2">
     </div>
     <canvas id="Canvas" width="600" height="650"></canvas>
     <div id="winMessage">¡Ganaste!</div>
+    <div id="loseMessage" style="display: none; color: red; font-size: 48px;">¡Perdiste!</div>
+    <button id="startButton">Iniciar Juego</button>
     <button id="resetButton">Reiniciar Juego</button>
     <audio id="backgroundMusic" loop>
         <source src="batman-series-tv-.mp3" type="audio/mp3">
+    </audio>
+    <audio id="loseSound">
+        <source src="mario-kart-lose-2.mp3" type="audio/mp3">
+    </audio>
+    <audio id="winSound">
+        <source src="street-fighter you win.mp3" type="audio/mp3">
     </audio>
     <script>
 
@@ -76,7 +113,11 @@
         const timerDisplay = document.getElementById("timer");
         const scoreDisplay = document.getElementById("score");
         const winMessage = document.getElementById("winMessage"); 
+        const loseMessage = document.getElementById("loseMessage");
         const backgroundMusic = document.getElementById("backgroundMusic");
+        const loseSound = document.getElementById("loseSound");
+        const winSound = document.getElementById("winSound");
+        const startButton = document.getElementById("startButton");
         const resetButton = document.getElementById("resetButton");
 
         document.addEventListener("keydown", () => {
@@ -92,7 +133,7 @@
             y: 50,
             width: 35,
             height: 35,
-            speed: 6,
+            speed: 5.5,
             direction: "right",
             image: new Image()
         };
@@ -130,6 +171,14 @@
         function updateScore() {
             scoreDisplay.textContent = `Score: ${score}`; 
         }
+
+         //Inicio del juego
+         function startGame() {
+            startButton.style.display = "none"; 
+            resetButton.style.display = "inline"; 
+            gameStarted = true;
+            gameLoop();  
+        }
         
         //Reinicio del juego
         function resetGame() {
@@ -143,6 +192,7 @@
             generatePoints();  
             generateLargePoints();
             winMessage.style.display = "none";
+            loseMessage.style.display = "none";
             gameWon = false;
             gameLoop(); 
         }
@@ -227,6 +277,10 @@
             });
         }
 
+        function playWinSound() {
+          winSound.load();  
+          winSound.play();  
+        }
         function checkPointCollision() {
             for (let i = points.length - 1; i >= 0; i--) {
                 let point = points[i];
@@ -243,6 +297,7 @@
                     if (points.length === 0 && largePoints.length === 0) {
                         gameWon = true; 
                         winMessage.style.display = "block"; 
+                        playWinSound();
                     }
 
 
@@ -291,6 +346,7 @@
                 if (points.length === 0 && largePoints.length === 0) {
                         gameWon = true;
                         winMessage.style.display = "block"; 
+                        playWinSound();
                     }
             }
         }
@@ -298,7 +354,7 @@
 
         //Enemigos
         const cubes = [];
-        const cubeCount = 7;  
+        const cubeCount = 6;  
         const cubeSize = 20;
         const cubeImages = [];
 
@@ -358,6 +414,29 @@
             });
         }
 
+          
+          function playLoseSound() {
+            loseSound.load();
+            loseSound.play(); 
+        }
+
+        function checkCollisionWithEnemies() {
+         for (let cube of cubes) {
+          if (
+            pacMan.x < cube.x + cubeSize &&
+            pacMan.x + pacMan.width > cube.x &&
+            pacMan.y < cube.y + cubeSize &&
+            pacMan.y + pacMan.height > cube.y
+         ) {
+            loseMessage.style.display = "block";  
+            playLoseSound();
+            cancelAnimationFrame(gameLoopId);  
+            return true;
+         }
+        }
+    return false;
+}
+
         function drawCubes() {
             cubes.forEach((cube, index) => {
                 ctx.drawImage(cubeImages[index], cube.x, cube.y, cubeSize, cubeSize);
@@ -366,31 +445,28 @@
 
         //Llama las funciones 
         function gameLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);  
-            drawWalls();
-            updatePosition();
-            drawPacMan();
-            if (!gameWon) {
-             updateCubes(); 
-             drawCubes();
-            }   
-            updateCubes();
-            drawCubes();
-            drawLargePoints();
-            checkLargePointCollision();
-            drawPoints();
-            checkPointCollision();
-            updateTimer(); 
-            if(!gameWon){
-             requestAnimationFrame(gameLoop);
+            if (!gameStarted) return;
+             ctx.clearRect(0, 0, canvas.width, canvas.height);  
+             drawWalls();
+             updatePosition();
+             drawPacMan();
+            if (!gameWon && !checkCollisionWithEnemies()) {  
+                updateCubes(); 
+                drawCubes();
+                drawLargePoints();
+                checkLargePointCollision();
+                drawPoints();
+                checkPointCollision();
+                updateTimer();
+                gameLoopId = requestAnimationFrame(gameLoop);  
             }
         }
-        
+        //Acciones de botones y teclas
+        startButton.addEventListener("click", startGame);
         document.addEventListener("keydown", changeDirection);
         pacMan.image.onload = gameLoop; 
         generateLargePoints();
         resetButton.addEventListener("click", resetGame);
-
         generatePoints(); 
     </script>
 </body>
